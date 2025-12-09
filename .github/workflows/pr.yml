@@ -1,7 +1,7 @@
 name: Send Notification
 on:
   pull_request:
-    types: [assigned, opened, reopened]
+    types: [assigned, opened, reopened, synchronize]
 
 jobs:
   notification:
@@ -17,4 +17,4 @@ jobs:
           MSG_TYPE: text
           USER_MAPS: ${{ secrets.USER_MAPS }}
           ASSIGNEES: ${{ toJson(github.event.pull_request.assignees) }}
-          POST_MESSAGE: 'Action Build Success'
+          POST_MESSAGE: 'Action Build Success ${github.event.pull_request.number}'
