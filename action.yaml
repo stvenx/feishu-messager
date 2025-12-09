@@ -1,6 +1,30 @@
 name: "Feishu Bot Message"
 description: "发送消息到飞书自定义机器人"
+author: "stvenx"
+branding:
+  icon: "bell"
+  color: "blue"
+inputs:
+  bot_token:
+    description: "飞书机器人 webhook token"
+    required: true
+  msg_type:
+    description: "消息类型，支持 text、markdown"
+    required: false
+    default: "text"
+  post_message:
+    description: "推送内容"
+    required: false
+  message_file:
+    description: "从文件中读取消息内容"
+    required: false
+  user_maps:
+    description: "用户映射配置，格式：stvenx:ou_xxxx,lizhi:ou_yyyy"
+    required: false
+  assignees:
+    description: "需要 @的用户列表（JSON格式）"
+    required: false
 runs:
   using: "docker"
-  image: "Dockerfile"
+  image: "docker://ghcr.io/stvenx/feishu-messager:latest"
 
