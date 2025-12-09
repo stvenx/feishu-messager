@@ -66,10 +66,9 @@ POST_MESSAGE=$(echo "$POST_MESSAGE" | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/
 # 飞书机器人的 webhook URL
 WEBHOOK_URL="https://open.feishu.cn/open-apis/bot/v2/hook/${BOT_TOKEN}"
 
+# 构建请求体
 if [ "$MSG_TYPE" = "text" ]; then
-  curl -X POST "${WEBHOOK_URL}" \
-    -H "Content-Type: application/json" \
-    -d @- <<END
+  REQUEST_BODY=$(cat <<END
 {
   "msg_type": "text",
   "content": {
@@ -77,12 +76,11 @@ if [ "$MSG_TYPE" = "text" ]; then
   }
 }
 END
+)
 elif [ "$MSG_TYPE" = "markdown" ]; then
   # 飞书 text 类型支持基本的 markdown 语法（如 **粗体**、*斜体* 等）
   # 如果需要更复杂的富文本格式，可以使用 post 或 interactive card 类型
-  curl -X POST "${WEBHOOK_URL}" \
-    -H "Content-Type: application/json" \
-    -d @- <<END
+  REQUEST_BODY=$(cat <<END
 {
   "msg_type": "text",
   "content": {
@@ -90,8 +88,39 @@ elif [ "$MSG_TYPE" = "markdown" ]; then
   }
 }
 END
+)
 else
   echo "Unsupported MSG_TYPE: ${MSG_TYPE}. Supported types: text, markdown"
+  exit 1
+fi
+
+# 调试输出：打印请求信息
+echo "=== Debug: Request Information ==="
+echo "URL: ${WEBHOOK_URL}"
+echo "Method: POST"
+echo "Content-Type: application/json"
+echo "Request Body:"
+echo "${REQUEST_BODY}" | jq . 2>/dev/null || echo "${REQUEST_BODY}"
+echo "================================"
+echo ""
+
+# 发送请求
+RESPONSE=$(echo "${REQUEST_BODY}" | curl -vv -X POST "${WEBHOOK_URL}" \
+  -H "Content-Type: application/json" \
+  -d @- \
+  -w "\nHTTP_CODE:%{http_code}" \
+  2>&1)
+
+# 输出响应
+echo ""
+echo "=== Debug: Response Information ==="
+echo "${RESPONSE}"
+echo "================================"
+
+# 检查 HTTP 状态码
+HTTP_CODE=$(echo "${RESPONSE}" | grep -oP 'HTTP_CODE:\K\d+' || echo "")
+if [ -n "$HTTP_CODE" ] && [ "$HTTP_CODE" != "200" ]; then
+  echo "Error: HTTP status code is ${HTTP_CODE}"
   exit 1
 fi
 
