@@ -67,7 +67,7 @@ POST_MESSAGE=$(echo "$POST_MESSAGE" | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/
 WEBHOOK_URL="https://open.feishu.cn/open-apis/bot/v2/hook/${BOT_TOKEN}"
 
 if [ "$MSG_TYPE" = "text" ]; then
-  curl -X POST "${WEBHOOK_URL}" \
+  curl -vv -X POST "${WEBHOOK_URL}" \
     -H "Content-Type: application/json" \
     -d @- <<END
 {
@@ -80,7 +80,7 @@ END
 elif [ "$MSG_TYPE" = "markdown" ]; then
   # 飞书 text 类型支持基本的 markdown 语法（如 **粗体**、*斜体* 等）
   # 如果需要更复杂的富文本格式，可以使用 post 或 interactive card 类型
-  curl -X POST "${WEBHOOK_URL}" \
+  curl -vv -X POST "${WEBHOOK_URL}" \
     -H "Content-Type: application/json" \
     -d @- <<END
 {
