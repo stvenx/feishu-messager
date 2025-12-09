@@ -4,11 +4,8 @@ FROM golang:1.21-alpine AS builder
 WORKDIR /app
 
 # 复制依赖文件
-COPY go.mod go.sum ./
-RUN go mod download
-
-# 复制源代码
 COPY . .
+RUN go mod download
 
 # 编译 - 静态编译，减小体积
 RUN CGO_ENABLED=0 GOOS=linux go build \
